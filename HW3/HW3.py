@@ -29,7 +29,7 @@ def create_graphing_data(x):
 	
 	# No vectorization here, as I couldn't get it to work.
 	# Sadly, a plain old Python for-loop.
-	independent_axis = range(1, N+1)
+	independent_axis = np.linspace(1, N, N)
 	dependent_axis = []
 	for n in independent_axis:
 		dependent_axis.append(compute_abs_frac_error(np.exp(x), approximate_exp(x, n)))
@@ -48,11 +48,12 @@ def plot_2by2_grid(four_x_values_list):
 		plt.title('$x = {}$'.format(four_x_values_list[plot_index]))
 		plt.xlabel('N'); plt.ylabel('Error')
 
+	plt.savefig('HW3.png')
 	plt.show()
 
 
 def main():
-	plot_2by2_grid([10, 2, -2, -10])
+	plot_2by2_grid([10., 2., -2., -10.])
 
 
 main()
