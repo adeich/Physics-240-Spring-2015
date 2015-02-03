@@ -28,7 +28,7 @@ def create_graphing_data(x):
 	#	approximate_exp(x_clones_array, independent_axis))
 	
 	# No vectorization here, as I couldn't get it to work.
-	# Plane, old Python for-loop.
+	# Sadly, a plain old Python for-loop.
 	independent_axis = range(1, N+1)
 	dependent_axis = []
 	for n in independent_axis:
