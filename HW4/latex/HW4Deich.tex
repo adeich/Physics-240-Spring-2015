@@ -15,10 +15,32 @@
 
 \maketitle
 
-\section{1. Football trajectory: Analytical vs Numerical (without air resistance)}
+Following the guidelines of the HW \#4 pseudocode, I wrote a Python program \texttt{balle.py} which computes and plots the trajectory of a football, both with the exact, analytic solution (in vacuum) and with Euler's method. If it's helpful, I'm storing my code in a GitHub repository at \url{https://github.com/adeich/Physics-240-Spring-2015/tree/master/HW4}
 
-\section{2. Euler's Method}
+I first checked that my Euler's Method integrator agrees with the analytic vacuum trajectory by plotting both together:
 
+\begin{figure}[h!]
+  \caption{Vacuum trajectories of both analytic and Euler's method solutions. There appears to be fairly good agreement. Here, $v_0$ = 20 m/s and $\theta_0$ = 45 degrees.}
+  \centering
+    \includegraphics[width=1.1\textwidth]{20_45_no_air.png}
+\end{figure}
+
+
+(a) Football trajectory: Analytical vs Numerical (without air resistance)
+
+\begin{figure}[h!]
+  \caption{Here, $v_0$ = 20 m/s and $\theta_0$ = 45 degrees.}
+  \centering
+    \includegraphics[width=1.1\textwidth]{20_45_yes_air.png}
+\end{figure}
+
+(b) 
+
+\begin{figure}[h!]
+  \caption{Vacuum trajectories of both analytic and Euler's method solutions. There appears to be fairly good agreement. Here, $v_0$ = 20 m/s and $\theta_0$ = 45 degrees.}
+  \centering
+    \includegraphics[width=1.1\textwidth]{30_30_yes_air.png}
+\end{figure}
 
 %\begin{tabular}{ l| l| l|  l| l| l }
 %  Dwarf Galaxy    & RA              & DEC        & z              & i-band mag & petroRad   \\ \hline
