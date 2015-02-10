@@ -74,8 +74,8 @@ def calc_avg_T(dt, theta0, N_cycles, algorithm):
 	total_time = 0
 
 	# Compute acceleration as function of position.
-	def compute_a(currTheta, g=9.8, L=1.0):
-		return -g/L * currTheta
+	def compute_a(Theta, g=9.8, L=1.0):
+		return -g/L * Theta
 
 	# go until N cycles have passed.
 	while len(half_periods)< 2*N_cycles:
@@ -88,11 +88,10 @@ def calc_avg_T(dt, theta0, N_cycles, algorithm):
 		elif algorithm == 'Euler':
 			currOmega = prevOmega + dt * compute_a(prevTheta)
 			currTheta = prevTheta + dt * prevOmega 
+
+		# If theta has just passed 0 in either direction.
 		if currTheta * prevTheta < 0:
-			if len(half_periods) == 0:
-				half_periods.append(total_time)
-			else:
-				half_periods.append(total_time - prev_time[len(prev_time)-1])
+			half_periods.append(total_time - prev_time[-1])
 			prev_time.append(total_time)
 		prevTheta = currTheta; prevOmega = currOmega
 		total_time += dt
