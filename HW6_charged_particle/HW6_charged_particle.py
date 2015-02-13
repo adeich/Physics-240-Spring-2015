@@ -53,20 +53,56 @@ def produce_plot_title(v0_vec, E_vec, B_vec):
 	return 'Lorentz Force\nv0:{} m/s\nE:{} N/C\nB:{} T'.format(v0_str, E_str, B_str)
 
 
-def measure_drift_velocity(position_array, time_array):
-	pass
+def measure_drift_velocity(trajectory_dict):
+	position = trajectory_dict['position']
+	t_array = trajectory_dict['t_array']
+
+
+	# first, record where the maxima occur in X and in t (assumes helix is in x-y plane).
+	maxima_locations = []
+	maxima_times = []
+	for i in range(1, len(position)-1):
+		# if we've just passed X=0 in either direction.
+		if (position[i][0] - position[i-1][0] < 0) and (position[i+1][0] - position[i][0] > 0):
+			maxima_locations.append(position[i])
+			maxima_times.append(t_array[i])
+	maxima_locations = np.array(maxima_locations)
+	maxima_times = np.array(maxima_times)
+
+	# second, create a list of velocities between all maxima.
+	drift_velocities = np.empty([len(maxima_locations)-1, 3])
+	for i in range(0, len(drift_velocities)):
+		dt = maxima_times[i+1] - maxima_times[i]
+		drift_velocities[i] = (maxima_locations[i+1] - maxima_locations[i]) / dt
+
+	# third, find the average and standard deviation of these velocities.
+	average_v = np.mean(drift_velocities, axis=0)
+	speeds = np.array([np.linalg.norm(v) for v in drift_velocities])
+	std_speeds = np.std(speeds)
+	mean_speeds = np.mean(speeds)
+
+
+	return {'n_maxima': len(maxima_locations), 'average_v_vec': average_v,
+		 'std_speeds': std_speeds, 'mean_speed': mean_speeds, 
+			'list_of_v': drift_velocities, 'maxima': maxima_locations,
+			'maxima_times': maxima_times}
 
 # Run trajectory function and make 3D plot (x, y, z).
 def make_3d_plot(dt, final_t, q, mass, v0_vec, x0_vec, E_vec, B_vec):
 	trajectory_dict = calc_particle_traj(dt, final_t, q, mass, x0_vec, v0_vec, E_vec, B_vec)
 	t_array = trajectory_dict['t_array']; position_array = trajectory_dict['position']
 	
+	drift_dict = measure_drift_velocity(trajectory_dict)
+	drift_loc = drift_dict['maxima']
+	drift_times = drift_dict['maxima_times']
+
 	plt.rc('text', usetex=True)
 	plt.rc('font', family='serif')
 
 	fig = plt.figure(figsize=(8,8), dpi=100, facecolor='w')
 	ax = fig.gca(projection='3d')
 	ax.plot(position_array.T[0], position_array.T[1], t_array)
+	ax.plot(drift_loc.T[0], drift_loc.T[1], drift_times)
 	ax.view_init(21,-60)
 	plt.xlabel('$x$ meters', size=14);	plt.ylabel('$y$ meters', size=14);
 	ax.set_zlabel('$t$ seconds', size=14)
@@ -93,11 +129,22 @@ pc = {'mass_proton': 1.67e-19, # kg
 	'q_proton': 1.60e-19, # C
 	'x0': np.array([-3e3, 0, 0]), # m
 	'v0': np.array([0, 1.5e3, 0]), # m/s
-	'E_vec': np.array([1e0, 0, 0]), # ?
+	'E_vec': np.array([1e2, 0, 0]), # ?
 	'B_vec': np.array([0, 0, 0.5]) # T
 	}
 
 def main():
-#	make_3d_plot(dt=0.01, final_t=100., 
-#		q=pc['q_proton'], mass=pc['mass_proton'], v0_vec=pc['v0'], 
-#		x0_vec=pc['x0'], E_vec=pc['E_vec'], B_vec=pc['B_vec'])
+
+	trajectory_dict = calc_particle_traj(dt=0.01, final_t=100., 
+		q=pc['q_proton'], mass=pc['mass_proton'], v0_vec=pc['v0'], 
+		x0_vec=pc['x0'], E_vec=pc['E_vec'], B_vec=pc['B_vec'])
+	print measure_drift_velocity(trajectory_dict) 
+
+	make_3d_plot(dt=0.01, final_t=100., 
+		q=pc['q_proton'], mass=pc['mass_proton'], v0_vec=pc['v0'], 
+		x0_vec=pc['x0'], E_vec=pc['E_vec'], B_vec=pc['B_vec'])
+
+
+
+
+main()
