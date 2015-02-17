@@ -35,17 +35,19 @@ def compute_1_orbit(dt, r0, v0):
 		't_array': np.arange(0, dt*len(r_list), dt)}
 		
 
-
-def do_part1a():
+# Compute eccentricity, perihelion, and semi-major axis and compare them to 
+# analytic values.
+def do_part1():
 
 	def study_orbit(r0_vec, v0_vec):
 
 		measurements= {}
 
 		# Perform euler-cromer integration to find r and v for all timesteps in an orbit.
-		orbit_results = compute_1_orbit(pc['year_in_seconds']/1e4, np.array([pc['r_earth_sun'], 0]),
-			np.array([0, pc['v_earth']]))
+		orbit_results = compute_1_orbit(pc['year_in_seconds']/1e3, r0_vec, v0_vec)
 
+		measurements['period'] = orbit_results['t_array'][-1]
+	
 		# find the perihelion and aphelion (biggest and smallest orbital radius)
 		max_r_mag = 0
 		min_r_mag = np.inf
@@ -64,30 +66,39 @@ def do_part1a():
 
 		### Compute eccentricity using specific energy and angular momentum.
 
-		# Specific energy E/m = - GM/r
-		measurements['E_spec'] = E_spec = - pc['G'] * pc['M_sun'] / np.linalg.norm(orbit_results['r_array'][0])
+		# Reduced mass.
+		mu = (pc['M_sun'] + pc['M_earth']) / (pc['M_sun'] + pc['M_earth'])
 
-		# Specific angular momentum L/m = r cross v
-		measurements['L_spec'] = L_spec = np.cross(orbit_results['r_array'][0], orbit_results['v_array'][0])
+		# Specific energy E/m = - GM/r
+		measurements['E_spec'] = E_spec = - pc['G'] * (pc['M_earth'] + pc['M_sun']) / (2 * measurements['a_empiric'])
+
+		# Specific angular momentum L = r cross v / mu
+		measurements['L_spec'] = L_spec = np.cross(orbit_results['r_array'][0], orbit_results['v_array'][0]) / mu
 
 		# Eccentricity, computed analytically.
 		measurements['e_analytic'] = np.sqrt(1 + (2 * E_spec * L_spec**2)/(pc['G']**2 * pc['M_sun']**2))		
 
+		# From T**2 / r**3 = 4pi**2 / GM
+		true_value = (4 * np.pi**2) / (pc['G'] * pc['M_sun'])
+		measured_value = measurements['period']**2 / measurements['a_empiric']**3 
+		measurements['KIIIerror'] = (true_value - measured_value) / true_value
 
-		print measurements	
+		output_lines = ['r0: {}; v0: {}'.format(r0_vec, v0_vec)]
+		for key, value in measurements.iteritems():
+			output_lines.append('\t{}: {:.2e}'.format(key, value))
+
+		print '\n'.join(output_lines)
+		
+
+	print 'Part 1a: eccentricity and semi-major axis.'
 	
+	# Near-circular orbit. These are just Earth orbit parameters.
+	study_orbit(r0_vec=np.array([pc['r_earth_sun'], 0]), v0_vec=np.array([0, pc['v_earth']]))
 
-	study_orbit(None, None)
+	# slightly more eccentric orbit.
+	study_orbit(r0_vec=np.array([pc['r_earth_sun'], 0]), v0_vec=np.array([0, pc['v_earth'] * 0.8 ]))
 
-	#print '{} steps. {} seconds.'.format(len(orbit_results['t_array']), orbit_results['t_array'][-1])
-
-
-def do_part1b():
-	pass
-
-def do_part1c():
-	pass
-
+	
 def do_part2a():
 	pass
 
@@ -98,9 +109,7 @@ def do_part2b():
 
 
 def do_all_of_HW7():
-	do_part1a()
-	do_part1b()
-	do_part1c()
+	do_part1()
 	do_part2a()
 	do_part2b()
 
