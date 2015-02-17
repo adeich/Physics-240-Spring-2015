@@ -11,9 +11,8 @@ pc = {
 	'year_in_seconds': 365. * 24 * 3600 #s
 	}	
 
-# Orbit integration for one orbital period.
-# This function is called by several of the HW parts for
-# varying purposes.
+# Orbit integration for one orbital period. This function is 
+# called by several of the HW parts for varying purposes.
 def compute_1_orbit(dt, r0, v0):
 
 	r_list = [r0]
@@ -26,7 +25,7 @@ def compute_1_orbit(dt, r0, v0):
 
 	# Euler-Cromer
 	while not orbit_has_just_passed_positive_x_axis(r_list):
-		# Acceleration given by a = F/m = ( GM / r^2 ) * r_hat = (GM / r^2 ) * r_vec
+		# Acceleration given by a = F/m = ( GM / r^2 ) * r_hat = (GM / r^3 ) * r_vec
 		currA = - pc['G'] * pc['M_sun'] * r_list[-1] / np.linalg.norm(r_list[-1])**3
 		v_list.append(v_list[-1] + currA * dt)
 		r_list.append(r_list[-1] + v_list[-1] * dt)
@@ -37,12 +36,50 @@ def compute_1_orbit(dt, r0, v0):
 		
 
 
-
 def do_part1a():
-	output_dict = compute_1_orbit(pc['year_in_seconds']/1e3, np.array([pc['r_earth_sun'], 0]),
-		np.array([0, pc['v_earth']]))
 
-	print '{} steps. {} seconds.'.format(len(output_dict['t_array']), output_dict['t_array'][-1])
+	def study_orbit(r0_vec, v0_vec):
+
+		measurements= {}
+
+		# Perform euler-cromer integration to find r and v for all timesteps in an orbit.
+		orbit_results = compute_1_orbit(pc['year_in_seconds']/1e4, np.array([pc['r_earth_sun'], 0]),
+			np.array([0, pc['v_earth']]))
+
+		# find the perihelion and aphelion (biggest and smallest orbital radius)
+		max_r_mag = 0
+		min_r_mag = np.inf
+		for r_vec in orbit_results['r_array']:
+			magnitude = np.linalg.norm(r_vec)
+			if magnitude > max_r_mag: 
+				max_r_mag = magnitude
+			if magnitude < min_r_mag:
+				min_r_mag = magnitude
+		measurements['r_ap'] = r_ap = max_r_mag
+		measurements['r_per'] = r_per = min_r_mag 
+
+		# Compute eccentricity using perihelion and aphelion.
+		measurements['e_empiric'] = (r_ap - r_per) / (r_ap + r_per)
+		measurements['a_empiric'] = (r_per + r_ap) / 2.
+
+		### Compute eccentricity using specific energy and angular momentum.
+
+		# Specific energy E/m = - GM/r
+		measurements['E_spec'] = E_spec = - pc['G'] * pc['M_sun'] / np.linalg.norm(orbit_results['r_array'][0])
+
+		# Specific angular momentum L/m = r cross v
+		measurements['L_spec'] = L_spec = np.cross(orbit_results['r_array'][0], orbit_results['v_array'][0])
+
+		# Eccentricity, computed analytically.
+		measurements['e_analytic'] = np.sqrt(1 + (2 * E_spec * L_spec**2)/(pc['G']**2 * pc['M_sun']**2))		
+
+
+		print measurements	
+	
+
+	study_orbit(None, None)
+
+	#print '{} steps. {} seconds.'.format(len(orbit_results['t_array']), orbit_results['t_array'][-1])
 
 
 def do_part1b():
