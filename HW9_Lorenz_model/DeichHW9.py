@@ -28,8 +28,6 @@ def dX_dt(pos_vec):
 
 
 # RK4 returns the next spatial position.
-# 'derivative_func' vector-function's derivative, and 'pos_vec', 
-# is the current position vector.
 def calc_RK4_vec(derivative_func, pos_vec, dt):
 	k1 = derivative_func(pos_vec)
 	k2 = derivative_func(pos_vec + k1 * dt/2.)
@@ -37,7 +35,7 @@ def calc_RK4_vec(derivative_func, pos_vec, dt):
 	k4 = derivative_func(pos_vec + k3 * dt)
 	return pos_vec + (k1 + 2. * (k2 + k3) + k4) * dt/6.
 
-# same form as 'rka()' from code examples.
+# similar form to 'rka()' from code examples.
 def calc_RK4_adaptive(curr_pos_vec, initial_delta_t, max_allowable_err):
 	curr_delta_t = initial_delta_t
 	S1, S2 = (0.9, 4.0)
@@ -111,6 +109,28 @@ def calc_trajectory_adaptive(t0, tfinal, x0, y0, z0):
 	return {'t_array': np.array(t_list), 'pos_array': np.array(pos_list)}
 
 
+# Object to represent a computed trajectory.
+class Trajectory:
+	def __init__(self, computed_trajectory_dict):
+		self.computed_trajectory_dict = computed_trajectory_dict
+		self.t_array = computed_trajectory_dict['t_array']
+		self.XandTarray = np.hstack([self.computed_trajectory_dict['pos_array'], 
+			np.array([self.computed_trajectory_dict['t_array']]).T]) 
+
+	def writeToFile(self, sFilename):
+		np.savetxt(sFilename, self.XandTarray, delimiter=',',
+			header='x, y, z, t')
+
+	def getMinMaxTimesteps(self):
+		steps_list = [self.t_array[i]-self.t_array[i-1] for i in range(1, len(self.t_array))]
+		return {'min_step': np.min(steps_list), 'max_step': np.max(steps_list)}
+	
+	def printReport(self):
+		minMaxTimeDict = self.getMinMaxTimesteps()
+		print 'min timestep: {:.2e}, max timestep: {:.2e}'.format(minMaxTimeDict['min_step'], 
+			minMaxTimeDict['max_step'])
+
+
 # Run trajectory function and make 3D plot (x, y, z).
 def make_3d_plot(trajectory_dict_non_adaptive, trajectory_dict_adaptive=None):
 
@@ -129,30 +149,42 @@ def make_3d_plot(trajectory_dict_non_adaptive, trajectory_dict_adaptive=None):
 	plt.xlabel('$x$ ', size=14);	plt.ylabel('$y$ ', size=14);
 	ax.set_zlabel('$z$ ', size=14)
 	#plt.ticklabel_format(style='sci', axis='both', scilimits=(1,3))
+	plt.suptitle('Non-adaptive time-step of Lorenz Model', fontsize=14)
+	plt.show()
+
+def make_3d_plot_from_files(adaptiveFileName1, adaptiveFileName2):
+	with open(adaptiveFileName1, 'r') as f1:
+		traj1 = np.recfromcsv(f1)
+
+	with open(adaptiveFileName2, 'r') as f2:
+		traj2 = np.recfromcsv(f2)
+	
+	fig = plt.figure(figsize=(8,8), dpi=100, facecolor='w')
+	ax = fig.gca(projection='3d')
+	ax.plot(traj1.x, traj1.y, traj1.z, label='$z_0 = 20.00$')
+	ax.plot(traj2.x, traj2.y, traj2.z, label='$z_0 = 20.01$')
+	plt.xlabel('$x$ ', size=14);	plt.ylabel('$y$ ', size=14);
+	ax.set_zlabel('$z$ ', size=14)
+	ax.legend()
 	plt.suptitle('hello', fontsize=14)
 	plt.show()
 
+def make_2d_plot_from_files(adaptiveFileName1, adaptiveFileName2):
+	with open(adaptiveFileName1, 'r') as f1:
+		traj1 = np.recfromcsv(f1)
 
-# Object to represent a computed trajectory.
-class Trajectory:
-	def __init__(self, computed_trajectory):
-		self.computed_trajectory = computed_trajectory
-		self.t_array = computed_trajectory['t_array']
-		self.XandTarray = np.hstack([self.computed_trajectory['pos_array'], 
-			np.array([self.computed_trajectory['t_array']]).T]) 
-
-	def writeToFile(self, sFilename):
-		np.savetxt(sFilename, self.XandTarray, delimiter=',',
-			header='x, y, z, t')
-
-	def getMinMaxTimesteps(self):
-		steps_list = [self.t_array[i]-self.t_array[i-1] for i in range(1, len(self.t_array))]
-		return {'min_step': np.min(steps_list), 'max_step': np.max(steps_list)}
+	with open(adaptiveFileName2, 'r') as f2:
+		traj2 = np.recfromcsv(f2)
 	
-	def printReport(self):
-		minMaxTimeDict = self.getMinMaxTimesteps()
-		print 'min timestep: {:.2e}, max timestep: {:.2e}'.format(minMaxTimeDict['min_step'], 
-			minMaxTimeDict['max_step'])
+	fig = plt.figure(figsize=(8,8), dpi=100, facecolor='w')
+	ax = fig.add_subplot(111)
+	ax.plot(traj1.x, traj1.t, label='$z_0 = 20.00$')
+	ax.plot(traj2.x, traj2.t, label='$z_0 = 20.01$')
+	plt.xlabel('$t$ ', size=14);	plt.ylabel('$x(t)$ ', size=14);
+	ax.legend(loc='upper left')
+	plt.suptitle('$x(t)$ for $x_0=1$, $y_0=1$', fontsize=14)
+	plt.show()
+
 
 
 def main():
@@ -161,12 +193,9 @@ def main():
 		'adaptive-1': 'trajectory_adaptive1.csv',
 		'adaptive-2': 'trajectory_adaptive2.csv'}
 
-	# Generate several trajectories.
-	trajectory_dict_non_adaptive = calc_trajectory_non_adaptive(dt=0.01, t0=0., tfinal=14.,
-		x0=1., y0=1., z0=20.) 
 
 	# Non-adaptive trajectory.
-	Trajectory_non_adaptive = Trajectory(computed_trajectory=calc_trajectory_non_adaptive(dt=0.01, t0=0., tfinal=14.,
+	Trajectory_non_adaptive = Trajectory(computed_trajectory_dict=calc_trajectory_non_adaptive(dt=0.01, t0=0., tfinal=14.,
 		x0=1., y0=1., z0=20.)) 
 	Trajectory_non_adaptive.writeToFile(filenames['non-adaptive'])
 
@@ -182,13 +211,8 @@ def main():
 	Trajectory_adaptive_1.writeToFile(filenames['adaptive-2'])
 	
 
-
-
-
-	# for debugging.
-	np.savetxt('pos_array.csv', trajectory_dict_non_adaptive['pos_array'], delimiter=',')
-
-	make_3d_plot(trajectory_dict_non_adaptive)
-#	make_3d_plot(trajectory_dict_adaptive)
+	make_3d_plot(Trajectory_non_adaptive.computed_trajectory_dict)
+#	make_3d_plot_from_files(filenames['adaptive-1'], filenames['adaptive-2'])
+#	make_2d_plot_from_files(filenames['adaptive-1'], filenames['adaptive-2'])
 
 main()
