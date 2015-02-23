@@ -50,12 +50,6 @@ def calc_RK4_adaptive(curr_pos_vec, initial_delta_t, max_allowable_err):
 		curr_error_estimate = np.max(
 			np.abs(X_big_step - X_small_step2) / (np.abs(X_big_step) + np.abs(X_small_step2) + 1e-16/max_allowable_err)
 			) / 2.0
-
-#		next_delta_t = S1 * curr_delta_t * np.abs(max_allowable_err / curr_error_estimate)**0.2
-#		next_delta_t = np.min(next_delta_t, S2 * curr_delta_t)
-#		next_delta_t = np.max(next_delta_t, curr_delta_t / S2)
-#		curr_delta_t = next_delta_t
-
 		estimated_delta_t = S1 * curr_delta_t * np.abs(max_allowable_err / curr_error_estimate)**0.2
 		if S1 * estimated_delta_t > S2 * curr_delta_t:
 			curr_delta_t = S2 * curr_delta_t
@@ -85,7 +79,8 @@ def calc_trajectory_non_adaptive(dt, t0, tfinal, x0, y0, z0):
 		# calculate next X vector.
 		pos_array[i] = calc_RK4_vec(derivative_func=dX_dt, 
 			pos_vec=pos_array[i-1], dt=dt)  
-
+	
+	print 'non-adaptive total steps: {}: tfinal: {}'.format(len(t_array), t_array[-1])
 	return {'t_array': t_array, 'pos_array': pos_array}
 
 
@@ -138,17 +133,62 @@ def make_3d_plot(trajectory_dict_non_adaptive, trajectory_dict_adaptive=None):
 	plt.show()
 
 
+# Object to represent a computed trajectory.
+class Trajectory:
+	def __init__(self, computed_trajectory):
+		self.computed_trajectory = computed_trajectory
+		self.t_array = computed_trajectory['t_array']
+		self.XandTarray = np.hstack([self.computed_trajectory['pos_array'], 
+			np.array([self.computed_trajectory['t_array']]).T]) 
+
+	def writeToFile(self, sFilename):
+		np.savetxt(sFilename, self.XandTarray, delimiter=',',
+			header='x, y, z, t')
+
+	def getMinMaxTimesteps(self):
+		steps_list = [self.t_array[i]-self.t_array[i-1] for i in range(1, len(self.t_array))]
+		return {'min_step': np.min(steps_list), 'max_step': np.max(steps_list)}
+	
+	def printReport(self):
+		minMaxTimeDict = self.getMinMaxTimesteps()
+		print 'min timestep: {:.2e}, max timestep: {:.2e}'.format(minMaxTimeDict['min_step'], 
+			minMaxTimeDict['max_step'])
+
+
 def main():
+	filenames = {
+		'non-adaptive': 'trajectory_non_adaptive.csv',
+		'adaptive-1': 'trajectory_adaptive1.csv',
+		'adaptive-2': 'trajectory_adaptive2.csv'}
+
+	# Generate several trajectories.
 	trajectory_dict_non_adaptive = calc_trajectory_non_adaptive(dt=0.01, t0=0., tfinal=14.,
 		x0=1., y0=1., z0=20.) 
 
-	trajectory_dict_adaptive = calc_trajectory_adaptive(t0=0., tfinal=14., x0=1., y0=1.,
-		z0=20.)
+	# Non-adaptive trajectory.
+	Trajectory_non_adaptive = Trajectory(computed_trajectory=calc_trajectory_non_adaptive(dt=0.01, t0=0., tfinal=14.,
+		x0=1., y0=1., z0=20.)) 
+	Trajectory_non_adaptive.writeToFile(filenames['non-adaptive'])
+
+	# Adaptive 1.
+	Trajectory_adaptive_1 = Trajectory(calc_trajectory_adaptive(t0=0., tfinal=14., x0=1., y0=1.,
+		z0=20.))
+	Trajectory_adaptive_1.writeToFile(filenames['adaptive-1'])
+	Trajectory_adaptive_1.printReport()
+
+	# Adaptive 2. Only difference is z0=20.01
+	Trajectory_adaptive_1 = Trajectory(calc_trajectory_adaptive(t0=0., tfinal=14., x0=1., y0=1.,
+		z0=20.01))
+	Trajectory_adaptive_1.writeToFile(filenames['adaptive-2'])
+	
+
+
+
 
 	# for debugging.
 	np.savetxt('pos_array.csv', trajectory_dict_non_adaptive['pos_array'], delimiter=',')
 
 	make_3d_plot(trajectory_dict_non_adaptive)
-	make_3d_plot(trajectory_dict_adaptive)
+#	make_3d_plot(trajectory_dict_adaptive)
 
 main()
