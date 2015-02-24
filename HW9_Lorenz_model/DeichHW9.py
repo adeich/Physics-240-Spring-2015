@@ -166,7 +166,7 @@ def make_3d_plot_from_files(adaptiveFileName1, adaptiveFileName2):
 	plt.xlabel('$x$ ', size=14);	plt.ylabel('$y$ ', size=14);
 	ax.set_zlabel('$z$ ', size=14)
 	ax.legend()
-	plt.suptitle('hello', fontsize=14)
+	plt.suptitle('Lorenz model $(x,y,z)$ for $x_0=1, y_0=1$', fontsize=14)
 	plt.show()
 
 def make_2d_plot_from_files(adaptiveFileName1, adaptiveFileName2):
@@ -178,11 +178,11 @@ def make_2d_plot_from_files(adaptiveFileName1, adaptiveFileName2):
 	
 	fig = plt.figure(figsize=(8,8), dpi=100, facecolor='w')
 	ax = fig.add_subplot(111)
-	ax.plot(traj1.x, traj1.t, label='$z_0 = 20.00$')
-	ax.plot(traj2.x, traj2.t, label='$z_0 = 20.01$')
+	ax.plot(traj1.t, traj1.x, label='$z_0 = 20.00$')
+	ax.plot(traj2.t, traj2.x, label='$z_0 = 20.01$')
 	plt.xlabel('$t$ ', size=14);	plt.ylabel('$x(t)$ ', size=14);
 	ax.legend(loc='upper left')
-	plt.suptitle('$x(t)$ for $x_0=1$, $y_0=1$', fontsize=14)
+	plt.suptitle('Lorenz $x(t)$ for $x_0=1$, $y_0=1$', fontsize=14)
 	plt.show()
 
 
@@ -210,9 +210,9 @@ def main():
 		z0=20.01))
 	Trajectory_adaptive_1.writeToFile(filenames['adaptive-2'])
 	
-
 	make_3d_plot(Trajectory_non_adaptive.computed_trajectory_dict)
-#	make_3d_plot_from_files(filenames['adaptive-1'], filenames['adaptive-2'])
-#	make_2d_plot_from_files(filenames['adaptive-1'], filenames['adaptive-2'])
+	make_3d_plot_from_files(filenames['adaptive-1'], filenames['adaptive-2'])
+	make_2d_plot_from_files(filenames['adaptive-1'], filenames['adaptive-2'])
+
 
 main()
