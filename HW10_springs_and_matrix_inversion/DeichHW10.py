@@ -48,8 +48,8 @@ def make_plot(Lw_array, F_rw_m, F_rw_t, k, L):
 	ax.grid()
 	ax.set_xlabel('$L_w$, the distance between walls (meters).')
 	ax.set_ylabel('Force on Right Wall (N)')
-	ax.plot(Lw_array, F_rw_m,  label='matrix inversion')
-	ax.plot(Lw_array, F_rw_t, '--', label='predicted')
+	ax.plot(Lw_array, F_rw_m,  label='F_rw from matrix inversion')
+	ax.plot(Lw_array, F_rw_t, '--', label='F_rw predicted')
 	plt.title('$k$={}\n $L$={} '.format(k, L))
 	plt.legend()
 	plt.show()
@@ -63,7 +63,7 @@ def do_part_1():
 		print '\t-> x = {}\n'.format(x)
 	
 def do_part_2():
-	for part in ['a', 'c']: # parts d and e are not viable here.
+	for part in ['a']: # you can add other parts to this list for more cases.
 		constants = constants_dict[part]
 		k, L, Lw = constants.k, constants.L, constants.Lw
 		Force_right_wall_measured = []
@@ -84,6 +84,8 @@ def do_part_2():
 
 
 def main():
+
+	# do_part_1() # this should throw an non-invertible error.
 	do_part_2()	
 
 main()
