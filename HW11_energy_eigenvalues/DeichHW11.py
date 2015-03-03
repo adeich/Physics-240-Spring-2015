@@ -9,14 +9,13 @@ pc = {
 	'V': -13.6 * 1.6e-19 # (eV * J/eV)
 }
 
-
 # the function f(E) whose zeroes are the energy eigenvalues of the finite well.
 def even_energy_state(E):
 	return np.sqrt(E - pc['V']) * np.tan((pc['a']/pc['h_bar']) * np.sqrt(2 
 		* pc['m'] * (E - pc['V']))) - np.sqrt(-E) 
 
 def odd_energy_state(E):
-	return np.sqrt(E - pc['V']) * 1/np.tan((pc['a']/pc['h_bar']) * np.sqrt(2 
+	return np.sqrt(E - pc['V']) * -1/np.tan((pc['a']/pc['h_bar']) * np.sqrt(2 
 		* pc['m'] * (E - pc['V']))) - np.sqrt(-E) 
 
 # where argument of tan() is 2pi. 
@@ -51,8 +50,8 @@ def make_plot():
 	fig, ax = plt.subplots()
 	fig.set_size_inches(8, 6)
 	ax.grid()
-	ax.set_xlabel('')
-	ax.set_ylabel('')
+	ax.set_xlabel('Energy (Joules)')
+	ax.set_ylabel('arbitrary units ($\sqrt{E}$)')
 	ax.set_ylim([-5e-8,5e-8])
 	ax.set_xlim([pc['V'],0])
 	ax.plot(E_array, even_energy_state(E_array),  label='even energy zeroing func')
