@@ -131,7 +131,7 @@ def do_part1():
 	print 'Part 1:' 
 
 	# Near-circular orbit. These are just Earth orbit parameters.
-	study_orbit(r0_vec=np.array([pc['r_earth_sun'], 0]), v0_vec=np.array([0, pc['v_earth']]))
+	study_orbit(r0_vec=np.array([pc['r_earth_sun'], 0]), v0_vec=np.array([0, pc['v_earth']]), printout=True)
 
 	# slightly more eccentric orbit.
 	study_orbit(r0_vec=np.array([pc['r_earth_sun'], 0]), v0_vec=np.array([0, pc['v_earth'] * 0.8 ]))
@@ -153,7 +153,7 @@ def do_part2():
 
 def do_all_of_HW7():
 	do_part1()
-	do_part2()
+#	do_part2()
 
 
 do_all_of_HW7()

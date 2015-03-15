@@ -126,7 +126,8 @@ def make_plot(period_data_array, fit_data_dict, best_fit_params_list):
 	fig = plt.figure(facecolor='w', figsize=(14,8))
 	ax = fig.add_subplot(111)
 	ax.set_title('Period of a pendulum vs. starting angle\n\n{}'.format(polynomial_formula))
-	ax.set_xlabel('Starting angle $a_0$ (radians)'); ax.set_ylabel('period (seconds)')
+	ax.set_xlabel('Starting angle $a_0$ (radians)'); ax.set_ylabel(
+		'$T(a_0)$ (seconds)')
 
 	# Add the data.
 	ax.plot(fit_data_dict['x_array'], fit_data_dict['y_array'], label='best parabolic fit')
@@ -136,6 +137,9 @@ def make_plot(period_data_array, fit_data_dict, best_fit_params_list):
 		'--', label='2nd order expansion')
 
 	ax.legend(loc='top right')
+	plt.grid()
+	plt.rcParams.update({'font.size': 18})
+	plt.tight_layout()
 	plt.show()
 
 

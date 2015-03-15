@@ -134,8 +134,6 @@ class Trajectory:
 # Run trajectory function and make 3D plot (x, y, z).
 def make_3d_plot(trajectory_dict_non_adaptive, trajectory_dict_adaptive=None):
 
-#	plt.rc('text', usetex=True)
-#	plt.rc('font', family='serif')
 	t_array = trajectory_dict_non_adaptive['t_array']
 	x_array = trajectory_dict_non_adaptive['pos_array'].T[0]
 	y_array = trajectory_dict_non_adaptive['pos_array'].T[1]
@@ -144,8 +142,6 @@ def make_3d_plot(trajectory_dict_non_adaptive, trajectory_dict_adaptive=None):
 	fig = plt.figure(figsize=(8,8), dpi=100, facecolor='w')
 	ax = fig.gca(projection='3d')
 	ax.plot(x_array, y_array, z_array)
-#	ax.plot(drift_loc.T[0], drift_loc.T[1], drift_times)
-#	ax.view_init(21,-60)
 	plt.xlabel('$x$ ', size=14);	plt.ylabel('$y$ ', size=14);
 	ax.set_zlabel('$z$ ', size=14)
 	#plt.ticklabel_format(style='sci', axis='both', scilimits=(1,3))

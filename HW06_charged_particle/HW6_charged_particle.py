@@ -96,8 +96,8 @@ def make_3d_plot(dt, final_t, q, mass, v0_vec, x0_vec, E_vec, B_vec):
 	drift_loc = drift_dict['maxima']
 	drift_times = drift_dict['maxima_times']
 
-	plt.rc('text', usetex=True)
-	plt.rc('font', family='serif')
+#	plt.rc('text', usetex=True)
+#	plt.rc('font', family='serif')
 
 	fig = plt.figure(figsize=(8,8), dpi=100, facecolor='w')
 	ax = fig.gca(projection='3d')
@@ -144,7 +144,7 @@ def main():
 		q=pc['q_proton'], mass=pc['mass_proton'], v0_vec=pc['v0'], 
 		x0_vec=pc['x0'], E_vec=pc['E_vec'], B_vec=pc['B_vec'])
 
-
+	print 'velocity should be {}'.format(np.cross(pc['E_vec'], pc['B_vec']) / np.linalg.norm(pc['B_vec'])**2)
 
 
 main()

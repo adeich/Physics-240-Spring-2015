@@ -39,12 +39,13 @@ def find_nearest_zero(function, initial_guess, steps):
 
 def make_plot():
 
-	E_array = np.linspace(pc['V'], 0, 200)
+	E_array = np.linspace(pc['V'], 0, 20000)
 	energy_spacings_array = np.arange(pc['V'], 0, get_dist_between_eigenstate_energies())
 	starting_guesses = np.linspace(pc['V']*(.91), 0, 7)
 	even_zeroes = [find_nearest_zero(even_energy_state, E, 20) for E in starting_guesses]
 	odd_zeroes =  [find_nearest_zero(odd_energy_state, E, 20) for E in starting_guesses]
 	print 'even_zeroes: {}'.format(even_zeroes)
+	print 'odd_zeroes: {}'.format(odd_zeroes)
 
 
 	fig, ax = plt.subplots()

@@ -83,8 +83,8 @@ def plot_trajectories(approx_xy=None, exact_xy=None, air_resistance=False):
 	fig = plt.figure(facecolor='w')
 
 	# add time and distance to landing spot.
-	approx_timestring = 'Euler\'s Method:\n range: {0:.2f}m \n t: {0:.2f}s'.format(approx_xy['x_distance'], approx_xy['flight_time'])
-	exact_timestring =  'Exact solution:\n range: {0:.2f}m \n t: {0:.2f}s'.format(exact_xy['x_distance'], exact_xy['flight_time'])
+	approx_timestring = 'Euler\'s Method:\n range: {}m \n t: {}s'.format(approx_xy['x_distance'], approx_xy['flight_time'])
+	exact_timestring =  'Exact solution:\n range: {}m \n t: {}s'.format(exact_xy['x_distance'], exact_xy['flight_time'])
 	ax = fig.add_subplot(111)
 	sTimeStep = 'time step: {} s'.format(exact_xy['dt'])
 	sTheta = 'Initial angle: {0:.2f} deg'.format(exact_xy['theta'] * (180./np.pi))
@@ -138,4 +138,4 @@ def main(v0, theta0, dt, air_resistance=False):
 
 
 main(30., np.pi/6, 0.01, air_resistance=False)
-main(30., np.pi/6, 0.01, air_resistance=True)
+# main(30., np.pi/6, 0.01, air_resistance=True)

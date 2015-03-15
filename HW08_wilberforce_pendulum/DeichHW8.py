@@ -30,26 +30,58 @@ def generate_trajectory(dt, timesteps, z0, theta0, m, I, k, eps, delta):
 	
 
 def make_plot(trajectory):
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	ax.plot(trajectory['t_array'], trajectory['z'], label='$z$')
-	ax.plot(trajectory['t_array'], trajectory['theta'], label='$\theta$')
-	ax.legend(loc='upper right')
+	fig, ax1 = plt.subplots()
+	
+#	plt.rc('text', usetex=True)
+
+	ax1.grid()
+	ax1.set_xlabel('time (s)')
+	ax1.set_ylabel('z (m)', color='b')
+	ax1.set_ylim([-.15, .15])
+	ax1.plot(trajectory['t_array'], trajectory['z'], 'b-',
+		 label='$z_0$ = {}m'.format(trajectory['z'][0]))
+	for tl in ax1.get_yticklabels():
+		tl.set_color('b')
+
+	ax2 = ax1.twinx()
+	ax2.set_ylim([- np.pi,  np.pi])
+	ax2.plot(trajectory['t_array'], trajectory['theta'], 
+		'g-', label='$theta_0$ = {}pi'.format(trajectory['theta'][0]/np.pi)) 
+	ax2.set_ylabel('$theta$ (rad)', color='g')
+	for tl in ax2.get_yticklabels():
+		tl.set_color('g')
+	ax1.legend(loc='upper left')
+	ax2.legend(loc='upper right')
 	plt.show()
 
 
 def main():
-	trajectory = generate_trajectory(dt = 0.01,
-		timesteps=1e4,
-		z0=0.10, 		# m
+	trajectory1 = generate_trajectory(dt = 0.01,
+		timesteps=9e3,
+		z0=0.10,	# m
 		theta0=0., 	# rad
-		m=0.5,			# kg
-		I=1.0e-3, 	# kg m^2
-		k=5, 				# N/m
-		eps=10e-2, 	# N
+		m=0.5,	# kg
+		I=10.0e-4,	# kg m^2
+		k=5, 	# N/m
+		eps=1e-2, # N
 		delta=10e-3 # N m 
 	)
-	make_plot(trajectory)
+	make_plot(trajectory1)
+
+
+	trajectory2 = generate_trajectory(dt = 0.01,
+		timesteps=9e3,
+		z0=0.,	# m
+		theta0=np.pi, 	# rad
+		m=0.5,	# kg
+		I=10.0e-4,	# kg m^2
+		k=5, 	# N/m
+		eps=1e-2, # N
+		delta=10e-3 # N m 
+	)
+
+	
+	make_plot(trajectory2)
 
 
 main()
