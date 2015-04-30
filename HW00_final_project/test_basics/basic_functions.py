@@ -5,6 +5,7 @@ from scipy.io import wavfile
 import matplotlib.pyplot as plt
 from scipy import signal
 import argparse
+import findpeaks
 
 
 # Reads the wav file. Returns a 1-d array of signal data. 
@@ -29,6 +30,15 @@ def find_xy_values_of_peaks(data_array, frequencies_array):
 	print peak_freqs
 	return {'freq': np.array(peak_freqs), 'amplitude': np.array(peak_amplitudes)}
 	
+
+def find_indices_of_peaks(data_array):
+	#peak_indices = signal.find_peaks_cwt(data_array, np.linspace(len(data_array)/2., len(data_array), 2))
+	peak_indices = findpeaks.find_peaks(data_array, range(len(data_array)), SlopeThreshold=0.003,
+		AmpThreshold=0.5, smoothwidth=7, peakgroup=9., smoothtype=3)
+	
+	return peak_indices
+	
+
 
 
 def plot_signal_and_spectra(signal_array, spectrum_array, frequencies_array, peak_data,
