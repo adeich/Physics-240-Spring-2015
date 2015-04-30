@@ -3,6 +3,8 @@ import numpy as np
 def find_peaks(x, y, SlopeThreshold, AmpThreshold, smoothwidth, 
 	peakgroup, smoothtype=None):
 
+
+	# set smoothtype to a number between 1 and 3.
 	if not smoothtype:
 		smoothtype = 1 
 	elif smoothtype > 3:
@@ -10,6 +12,7 @@ def find_peaks(x, y, SlopeThreshold, AmpThreshold, smoothwidth,
 	elif smoothtype < 1:
 		smoothtype = 1
 	
+	# set smoothwidth. used only in determining start- and end-indices. 
 	if smoothwidth < 1:
 		smoothwidth = 1
 	smoothwidth = np.round(smoothwidth)
@@ -17,9 +20,9 @@ def find_peaks(x, y, SlopeThreshold, AmpThreshold, smoothwidth,
 	peakgroup = np.round(peakgroup)
 
 	if smoothwidth > 1:
-		d = fastsmooth(deriv(y), smoothwidth, smoothtype)
+		d = fastsmooth(take_derivative(y), smoothwidth, smoothtype)
 	else:
-		d = deriv(y)
+		d = take_derivative(y)
 
 
 	n = np.round((peakgroup/2) + 1)
@@ -35,10 +38,10 @@ def find_peaks(x, y, SlopeThreshold, AmpThreshold, smoothwidth,
 
 		# Detects zero-crossing.
 		if np.sign(d[j]) < np.sign(d[j + 1]):
-			# If slope of derivative is larger than threshold.
+			# If slope of take_derivativeative is larger than threshold.
 			if (d[j] - d[j + 1]) > (SlopeThreshold * y[j]):
 				# If height of peak is larger than AmpThreshold.
-				if ((y[j] > AmpTest) or (y[j + 1] > AmpTest):
+				if (y[j] > AmpTest) or (y[j + 1] > AmpTest):
 
 					xx = np.zeros(len(peakgroup))
 					yy = np.zeros(len(peakgroup))
@@ -64,7 +67,7 @@ def find_peaks(x, y, SlopeThreshold, AmpThreshold, smoothwidth,
 						measured_width = 0
 
 					if peakY > AmpThreshold:
-						P.append(np.round(peak), PeakX, PeakY, MeasuredWidth, 1.0646.* PeakY * MeasuredWidth)
+						P.append(np.round(peak), PeakX, PeakY, MeasuredWidth, 1.0646* PeakY * MeasuredWidth)
 						
 		
 
@@ -79,7 +82,7 @@ def guassfit(x_array, y_array):
 	pass
 
 # returns centered derivative of a.
-def deriv(a):
+def take_derivative(a):
 	n = len(a) - 2
 	d = np.empty(n)
 	for i in range(n):
@@ -103,6 +106,7 @@ def fastsmooth(Y, w, smooth_type=None, ends=None):
 		SmoothY = sliding_avg(sliding_avg(sliding_avg(Y, w, ends), w, ends), w, ends)
 
 
+
 # Smooths data by performing sliding average
 def sliding_avg(Y, smoothwidth, ends):
 	width = np.round(smoothwidth)
@@ -117,25 +121,16 @@ def sliding_avg(Y, smoothwidth, ends):
 	SmoothY = s / width
 	# then taper the ends of the signal if ends=1.
 
-# removes NaNs from data
-def remove_NaN(a):
-	pass
+	if ends == 1:
+		startpoint = (smoothwidth + 1.) / 2.
+		SmoothY[0] = (Y[0] + Y[2]) / 2.
+		L = len(Y)
+		for k in range(1, startpoint):
+			SmoothY[k] = np.mean(Y[0: 2*k -1])
+			SmoothY[L - k] = np.mean(Y[L - 2*k + 2: L])
 
-def fit_gaussian(x, y)
-	maxy=max(y);
-	for p=1:length(y),
-   	if y(p)<(maxy/100),y(p)=maxy/100;end
-	
-	z = log(y)
-	coef = np.polyfit(x,z,2)
-	a=coef[3]
-	b=coef[2]
-	c=coef[1]
-	Height= exp(a-c*(b/(2*c))^2);
-	Position= -b / (2*c);
-	Width=2.35482 / (sqrt(2)*sqrt(-c))
 
-	return Height, Position, Width
+	return SmoothY
 
 
 
