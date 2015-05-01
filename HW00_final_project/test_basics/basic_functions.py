@@ -31,9 +31,8 @@ def find_xy_values_of_peaks(data_array, frequencies_array):
 	return {'freq': np.array(peak_freqs), 'amplitude': np.array(peak_amplitudes)}
 	
 
-def find_indices_of_peaks(data_array):
-	#peak_indices = signal.find_peaks_cwt(data_array, np.linspace(len(data_array)/2., len(data_array), 2))
-	peak_indices = findpeaks.find_peaks(data_array, range(len(data_array)), SlopeThreshold=0.003,
+def find_indices_of_peaks(x, y):
+	peak_indices = findpeaks.find_peaks(x=x, y=y, SlopeThreshold=0.003,
 		AmpThreshold=0.5, smoothwidth=7, peakgroup=9., smoothtype=3)
 	
 	return peak_indices
@@ -81,9 +80,9 @@ def main(soundfile):
 	print np.shape(fft_data['freqs_array'])
 
 	# Compute the peaks of the FFT data
-	peak_data = find_xy_values_of_peaks(data_array=fft_data['fft_array'],
-		 frequencies_array=fft_data['freqs_array'])	
-	print peak_data['freq']
+	peak_data = find_indices_of_peaks(y=fft_data['fft_array'],
+		 x=fft_data['freqs_array'])
+	print peak_data
 	
 
 
@@ -99,12 +98,8 @@ def main(soundfile):
 if __name__ == "__main__":
   # Get commandline arguments.
   parser = argparse.ArgumentParser(description='description')
-  parser.add_argument('--soundclip', '-s', type=str,
+  parser.add_argument('soundclip', type=str,
                    help='sound file in wav format')
   args = parser.parse_args()
   # Call main function.
   main(soundfile=args.soundclip)
-
-
-
-
