@@ -31,17 +31,18 @@ def find_xy_values_of_peaks(data_array, frequencies_array):
 	return {'freq': np.array(peak_freqs), 'amplitude': np.array(peak_amplitudes)}
 	
 
-def find_indices_of_peaks(x, y):
-	peak_indices = findpeaks.find_peaks(x=x, y=y, SlopeThreshold=0.003,
-		AmpThreshold=0.5, smoothwidth=7, peakgroup=9., smoothtype=3)
+def get_peak_data(x, y):
+	peak_data = findpeaks.find_peaks(x=x, y=np.abs(y), SlopeThreshold=500.,
+		AmpThreshold=0., smoothwidth=7, peakgroup=9., smoothtype=3)
 	
-	return peak_indices
+
+	return peak_data
 	
 
 
 
 def plot_signal_and_spectra(signal_array, spectrum_array, frequencies_array, peak_data,
-	 timestep, save_to):
+	 timestep, save_to, peakpointsX, peakpointsY):
 	
 	spectrum_array = np.abs(spectrum_array)
 	
@@ -56,7 +57,7 @@ def plot_signal_and_spectra(signal_array, spectrum_array, frequencies_array, pea
 
 	plt.subplot(2, 1, 2)
 	plt.plot(frequencies_array, spectrum_array) 
-	plt.plot(peak_data['freq'], peak_data['amplitude'], 'ro')
+	plt.plot(peakpointsX, peakpointsY, 'ro')
 	plt.title('spectrum')
 	plt.xlabel('frequency'); plt.ylabel('amplitude')
 	plt.xlim(50, 15000)
@@ -77,10 +78,10 @@ def main(soundfile):
 
 	# Compute the FFT of the audio file. 
 	fft_data = calc_fft(channel1_data['signal_array'], timestep)
-	print np.shape(fft_data['freqs_array'])
+	#print np.shape(fft_data['freqs_array'])
 
 	# Compute the peaks of the FFT data
-	peak_data = find_indices_of_peaks(y=fft_data['fft_array'],
+	peak_data = get_peak_data(y=fft_data['fft_array'],
 		 x=fft_data['freqs_array'])
 	print peak_data
 	
@@ -89,9 +90,10 @@ def main(soundfile):
 	# Plot the signal and the power spectrum.
 	image_file_name = '{}_spectrum.png'.format(os.path.splitext(os.path.basename(soundfile))[0])
 	plot_signal_and_spectra(signal_array=channel1_data['signal_array'], 
-		spectrum_array=fft_data['fft_array'],
+		spectrum_array=np.abs(fft_data['fft_array']),
 		frequencies_array=fft_data['freqs_array'], peak_data=peak_data, 
-		timestep=timestep, save_to=image_file_name)
+		timestep=timestep, save_to=image_file_name, peakpointsX=peak_data.T[0], 
+		peakpointsY=peak_data.T[1])
 		
 
 
