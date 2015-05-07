@@ -15,26 +15,30 @@ def read_wav_file(filename):
 
 
 def calc_fft(signal_data, timestep):
-	return {'fft_array': np.fft.fft(signal_data), 
-		'freqs_array': np.fft.fftfreq(n=len(signal_data), d=timestep)}
+	power_spectrum = np.fft.fft(signal_data)
+	index_of_largest_positive = np.floor(len(power_spectrum) / 2)
+	positive_half_of_power_spectrum = power_spectrum[0: index_of_largest_positive]
+	all_frequencies = np.fft.fftfreq(n=len(signal_data), d=timestep)
+	positive_half_of_frequencies = all_frequencies[0: index_of_largest_positive]
+	return {'fft_array': positive_half_of_power_spectrum,
+		'freqs_array': positive_half_of_frequencies}
 
 
-def find_xy_values_of_peaks(data_array, frequencies_array):
-	peak_indices = signal.find_peaks_cwt(data_array, widths=np.arange(5, 20), min_snr=2,
-		 noise_perc=0.1)
-	peak_amplitudes= []
-	peak_freqs = []
-	for peak_index in peak_indices:
-		peak_amplitudes.append(data_array[peak_index])
-		peak_freqs.append(frequencies_array[peak_index])
-	print peak_freqs
-	return {'freq': np.array(peak_freqs), 'amplitude': np.array(peak_amplitudes)}
+#def find_xy_values_of_peaks(data_array, frequencies_array):
+#	peak_indices = signal.find_peaks_cwt(data_array, widths=np.arange(5, 20), min_snr=2,
+#		 noise_perc=0.1)
+#	peak_amplitudes= []
+#	peak_freqs = []
+#	for peak_index in peak_indices:
+#		peak_amplitudes.append(data_array[peak_index])
+#		peak_freqs.append(frequencies_array[peak_index])
+#	print peak_freqs
+#	return {'freq': np.array(peak_freqs), 'amplitude': np.array(peak_amplitudes)}
 	
 
 def get_peak_data(x, y):
-	peak_data = findpeaks.find_peaks(x=x, y=np.abs(y), SlopeThreshold=500.,
-		AmpThreshold=0., smoothwidth=7, peakgroup=9., smoothtype=3)
-	
+	peak_data = findpeaks.find_peaks(x=x, y=np.abs(y), SlopeThreshold=200.,
+		AmpThreshold=0., smoothwidth=5, peakgroup=9., smooth_iterations=5, polyfitdegree=37)
 
 	return peak_data
 	
@@ -57,6 +61,15 @@ def plot_signal_and_spectra(signal_array, spectrum_array, frequencies_array, pea
 
 	plt.subplot(2, 1, 2)
 	plt.plot(frequencies_array, spectrum_array) 
+
+	### polynomial fit
+	
+	poly_coefficients = np.polyfit(frequencies_array, spectrum_array, deg=37)
+	plt.plot(np.polyval(poly_coefficients, frequencies_array))	
+
+	### end polynomial fit.
+
+
 	plt.plot(peakpointsX, peakpointsY, 'ro')
 	plt.title('spectrum')
 	plt.xlabel('frequency'); plt.ylabel('amplitude')

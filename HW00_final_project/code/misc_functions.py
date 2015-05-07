@@ -3,13 +3,14 @@ import matplotlib.pyplot as plt
 
 
 
-def quick_plot(x_array, y_array, title, figsize=(8, 6),
+def quick_plot(x_and_y_arrays, title, figsize=(8, 6),
 	show_plot=True, filename=None, ylog=False, xlog=False,
 	xlabel=None, ylabel=None, xlim=None, ylim=None):
 
 	fig = plt.figure(figsize=figsize, dpi=100, facecolor='w')
 	ax = fig.add_subplot(111)
-	ax.plot(x_array, y_array)
+	for array_pair in x_and_y_arrays:
+		ax.plot(array_pair[0], array_pair[1])
 	plt.suptitle(title, fontsize=14)
 
 	if xlim:
