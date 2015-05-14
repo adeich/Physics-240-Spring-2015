@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from scipy import signal
 import argparse
 import findpeaks
+import names_generator
 
 
 # Reads the wav file. Returns a 1-d array of signal data. 
@@ -35,20 +36,29 @@ def calc_fft(signal_data, timestep):
 #	print peak_freqs
 #	return {'freq': np.array(peak_freqs), 'amplitude': np.array(peak_amplitudes)}
 	
-
+# should return dict of indices of peaks, (x, y) array.
 def get_peak_data(x, y):
 	peak_data = findpeaks.find_peaks(x=x, y=np.abs(y), SlopeThreshold=200.,
-		AmpThreshold=0., smoothwidth=5, peakgroup=9., smooth_iterations=5, polyfitdegree=37)
+		AmpThreshold=0., smoothwidth=25, peakgroup=9., smooth_iterations=5, polyfitdegree=37)
 
 	return peak_data
 	
 
+def make_normalized_power_spectrum():
+	pass
+
+
 
 
 def plot_signal_and_spectra(signal_array, spectrum_array, frequencies_array, peak_data,
-	 timestep, save_to, peakpointsX, peakpointsY):
+	 timestep, save_to, show_plot=False):
 	
 	spectrum_array = np.abs(spectrum_array)
+
+	peakpointsJ = peak_data['actual_peak_xyj_list'].T[2]
+	peakpointsX = peak_data['actual_peak_xyj_list'].T[0]
+	peakpointsY = peak_data['actual_peak_xyj_list'].T[1]
+	polyfit_y_array = peak_data['polyfit_y_array']	
 	
 	plt.figure(facecolor='w')
 
@@ -62,10 +72,9 @@ def plot_signal_and_spectra(signal_array, spectrum_array, frequencies_array, pea
 	plt.subplot(2, 1, 2)
 	plt.plot(frequencies_array, spectrum_array) 
 
-	### polynomial fit
+	### plot polynomial fit
 	
-	poly_coefficients = np.polyfit(frequencies_array, spectrum_array, deg=37)
-	plt.plot(np.polyval(poly_coefficients, frequencies_array))	
+	plt.plot(peak_data['polyfit_x_array'], polyfit_y_array)
 
 	### end polynomial fit.
 
@@ -80,7 +89,48 @@ def plot_signal_and_spectra(signal_array, spectrum_array, frequencies_array, pea
 
 
 	plt.savefig(save_to)
-	plt.show()
+	if show_plot:
+		plt.show()
+
+
+def analyze_one_sound_file(sound_filename, names_generator_function, destination_dir):
+	# generate associated filenames.
+	names_dict = names_generator_function(sound_filename, destination_directory=destination_dir)
+
+	# load WAV file as array.
+	channel_data = read_wav_file(sound_filename)
+	signal_array = channel_data['signal_array']
+	timestep = 1./channel_data['sample_rate']
+
+	# do FFT to find power spectrum.
+	fft_data = calc_fft(signal_array, timestep)
+
+	# find peaks in power spectrum.
+	peak_data = get_peak_data(y=fft_data['fft_array'], 
+		x=fft_data['freqs_array'])
+
+	# make plot including signal, power spectrum, and peaks.
+	plot_signal_and_spectra(signal_array=signal_array,
+		spectrum_array=fft_data['fft_array'],
+		frequencies_array=fft_data['freqs_array'],
+		peak_data=peak_data,
+		timestep=timestep,
+		save_to=names_dict['raw_plot'])
+
+	# normalize power spectrum and peaks around first peak; make same plots as above.
+	#normalized_fft_data = make_normalized_power_spectrum(fft_data, peak_data)
+	plot_signal_and_spectra(signal_array=signal_array,
+		spectrum_array=fft_data['fft_array'],
+		frequencies_array=fft_data['freqs_array'],
+		peak_data=peak_data,
+		timestep=timestep,
+		save_to=names_dict['normalized_plot'])
+
+
+	# save to file: (1) raw power spectrum (array -> txt), (2) plot of raw spectrum & peaks,
+	# (3) normalized spectrum array, (4) plot of normalized power spectrum & peaks.
+
+
 
 def main(soundfile):
 
@@ -96,7 +146,7 @@ def main(soundfile):
 	# Compute the peaks of the FFT data
 	peak_data = get_peak_data(y=fft_data['fft_array'],
 		 x=fft_data['freqs_array'])
-	print peak_data
+	print peak_data['simple_peak_xy_list']
 	
 
 
@@ -105,16 +155,18 @@ def main(soundfile):
 	plot_signal_and_spectra(signal_array=channel1_data['signal_array'], 
 		spectrum_array=np.abs(fft_data['fft_array']),
 		frequencies_array=fft_data['freqs_array'], peak_data=peak_data, 
-		timestep=timestep, save_to=image_file_name, peakpointsX=peak_data.T[0], 
-		peakpointsY=peak_data.T[1])
+		timestep=timestep, save_to=image_file_name, show_plot=True)
 		
 
 
 if __name__ == "__main__":
   # Get commandline arguments.
-  parser = argparse.ArgumentParser(description='description')
-  parser.add_argument('soundclip', type=str,
+	parser = argparse.ArgumentParser(description='description')
+	parser.add_argument('soundclip', type=str,
                    help='sound file in wav format')
-  args = parser.parse_args()
+	args = parser.parse_args()
   # Call main function.
-  main(soundfile=args.soundclip)
+  #main(soundfile=args.soundclip)
+	analyze_one_sound_file(sound_filename=args.soundclip, 
+		names_generator_function=names_generator.names_generator, 
+		destination_dir='intermediate_results')

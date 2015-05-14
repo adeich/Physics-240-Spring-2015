@@ -67,12 +67,13 @@ def find_peaks(x, y, SlopeThreshold, AmpThreshold, smoothwidth,
 	### for testing
 	print 'len d: {}, len x: {}'.format(len(d), len(x))
 #	padded_d = np.lib.pad(d, (1, 1), 'constant', constant_values = (0, 0))
-	mf.quick_plot([(x, np.real(d))], title='derivative of FFT', xlog=True, xlim=(50.), filename='derivative.png')
+#	mf.quick_plot([(x, np.real(d))], title='derivative of FFT', xlog=True, xlim=(50.), filename='derivative.png')
 	#second_padded_d = np.lib.pad(second_derivative, (2, 2), 'constant', constant_values = (0, 0))
 	#mf.quick_plot(x, np.real(second_padded_d), title='second derivative', xlog=True, xlim=(50.))
 	### for testing
 
 	ZeroDerivatives = []
+	peaks_before_poly_subtraction = []
 
 	starting_index = 2 * np.round(smoothwidth/2 - 1)
 	ending_index =  len(y) - smoothwidth - 1
@@ -93,7 +94,7 @@ def find_peaks(x, y, SlopeThreshold, AmpThreshold, smoothwidth,
 					pass
 
 	# For each zero-derivative, find local maximum signal value.
-	# 'local' means within index search_range of guess index.
+	# 'local' means within search_range of guess index.
 	actual_peak_values = []
 	for zero_derivative_spot in ZeroDerivatives:
 		xguess = zero_derivative_spot['x']
@@ -104,22 +105,28 @@ def find_peaks(x, y, SlopeThreshold, AmpThreshold, smoothwidth,
 		search_set = y[search_j_min : search_j_max]
 		j_of_max = np.argmax(search_set) + search_j_min
 		if y[j_of_max] - polyfit_y_array[j_of_max] > AmpThreshold:
-			actual_peak_values.append({'x': x[j_of_max], 'y': y[j_of_max], 'j': j_of_max})
+			actual_peak_values.append([x[j_of_max], y[j_of_max], j_of_max])
 		else:
 			pass
 
 	simple_peak_xy_list = []
 	for peak in actual_peak_values:
-		simple_peak_xy_list.append([peak['x'], peak['y']])
+		simple_peak_xy_list.append([peak[0], peak[1]])
 
-	peaks_before_poly_subtraction = []
 
 	# data set to pass through return statement. Also include 1st and 2nd deriv before smooth.
-	all_data_pack = [polyfit_y_array, peaks_before_poly_subtraction, simple_peak_xy_list,
-		d, second_derivative]
+	all_data_pack = {'polyfit_y_array': polyfit_y_array,
+	 	'peaks_before_poly_subtraction': peaks_before_poly_subtraction,
+		'simple_peak_xy_list': np.array(simple_peak_xy_list),
+		'actual_peak_xyj_list': np.array(actual_peak_values),
+		'first_derivative': d, 
+		'second_derivative': second_derivative,
+		'polyfit_x_array': x,
+		'polyfit_y_array': polyfit_y_array,
+		'polyfit_degree': polyfitdegree }
 
 	# returns list of (x, y) tuples for each peak
-	return np.array(simple_peak_xy_list)
+	return all_data_pack
 
 
 def module_test():
