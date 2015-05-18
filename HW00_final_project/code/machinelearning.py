@@ -1,19 +1,6 @@
 from sklearn import datasets
 from sklearn import svm
 
-def get_target_key():
-	return {
-	'piano': 1,
-	'guitar': 2,
-	'voice': 3,
-	'recorder': 4
-	}
-
-
-# make sure incoming data all has the same shape.
-def normalize_spectrum_data(data):
-	pass
-
 
 def make_data_array_for_ML(list_of_sample_dicts):
 
