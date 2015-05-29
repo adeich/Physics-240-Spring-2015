@@ -158,7 +158,7 @@ def plot_signal_and_spectra(signal_array, spectrum_array, frequencies_array, pea
 		plt.show()
 
 
-def analyze_one_sound_file(sound_filename, names_generator_function, destination_dir):
+def analyze_one_sound_file(sound_filename, names_generator_function, destination_dir, showplot=False):
 	# generate associated filenames.
 	names_dict = names_generator_function(sound_filename, destination_directory=destination_dir)
 
@@ -180,7 +180,8 @@ def analyze_one_sound_file(sound_filename, names_generator_function, destination
 		frequencies_array=fft_data['freqs_array'],
 		peak_data=peak_data,
 		timestep=timestep,
-		save_to=names_dict['raw_plot'])
+		save_to=names_dict['raw_plot'],
+		show_plot=showplot)
 
 	# normalize power spectrum and peaks around first peak; make same plots as above.
 	normalized_fft_data = make_normalized_power_spectrum(fft_data, peak_data)
@@ -207,4 +208,4 @@ if __name__ == "__main__":
 
 	analyze_one_sound_file(sound_filename=args.soundclip, 
 		names_generator_function=names_generator.names_generator, 
-		destination_dir='intermediate_results')
+		destination_dir='intermediate_results', showplot=True)
